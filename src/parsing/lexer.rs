@@ -7,7 +7,7 @@ impl<'a> Lexer<'a> {
         Self { content }
     }
 
-    pub fn next_token(&mut self) -> Option<&'a [char]> {
+    pub fn next_token(&mut self) -> Option<String> {
         self.trim_left();
 
         if self.content.is_empty() {
@@ -15,14 +15,19 @@ impl<'a> Lexer<'a> {
         }
 
         if self.content[0].is_alphabetic() {
-            return Some(self.chop_while(|ch| ch.is_alphanumeric()));
+            return Some(
+                self.chop_while(|ch| ch.is_alphanumeric())
+                    .iter()
+                    .map(|ch| ch.to_ascii_uppercase())
+                    .collect(),
+            );
         }
 
         if self.content[0].is_numeric() {
-            return Some(self.chop_while(|ch| ch.is_numeric()));
+            return Some(self.chop_while(|ch| ch.is_numeric()).iter().collect());
         }
 
-        Some(self.chop_and_extract_token(1))
+        Some(self.chop_and_extract_token(1).iter().collect())
     }
 
     fn trim_left(&mut self) {
@@ -51,7 +56,7 @@ impl<'a> Lexer<'a> {
 }
 
 impl<'a> Iterator for Lexer<'a> {
-    type Item = &'a [char];
+    type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.next_token()
