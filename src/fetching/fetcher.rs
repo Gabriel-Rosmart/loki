@@ -1,12 +1,15 @@
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
+use walkdir::WalkDir;
 
 pub struct Fetcher;
 
 impl Fetcher {
     pub fn fetch_directory(path: &str) -> Vec<PathBuf> {
-        fs::read_dir(path)
-            .expect("Unable to read directory")
-            .map(|file| file.unwrap().path())
+        WalkDir::new(path)
+            .into_iter()
+            .map(|file| file.unwrap())
+            .filter(|file| file.file_type().is_file())
+            .map(|file| file.into_path())
             .collect()
     }
 }
