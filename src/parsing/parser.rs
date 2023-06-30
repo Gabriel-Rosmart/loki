@@ -14,13 +14,16 @@ impl Parser {
         while let Some(token_slice) = lexer.next_token() {
             let token = token_slice
                 .iter()
+                .filter(|ch| ch.is_alphanumeric())
                 .map(|ch| ch.to_ascii_uppercase())
                 .collect::<String>();
 
-            term_frequencies
-                .entry(token)
-                .and_modify(|counter| *counter += 1)
-                .or_insert(1);
+            if !token.is_empty() {
+                term_frequencies
+                    .entry(token)
+                    .and_modify(|counter| *counter += 1)
+                    .or_insert(1);
+            }
         }
 
         term_frequencies
