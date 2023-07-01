@@ -1,4 +1,5 @@
 use super::lexer::Lexer;
+use crate::fetching::indexer::TermMapThroughDocuments;
 use std::collections::HashMap;
 
 type FrequencyMap = HashMap<String, usize>;
@@ -6,8 +7,10 @@ type FrequencyMap = HashMap<String, usize>;
 pub struct Parser;
 
 impl Parser {
-    pub fn index(file_contents: Vec<char>) -> FrequencyMap {
-        // let contents_slice = file_contents.chars().collect::<Vec<char>>();
+    pub fn index(
+        file_contents: Vec<char>,
+        documents_term_map: &mut TermMapThroughDocuments,
+    ) -> FrequencyMap {
         let mut lexer = Lexer::new(&file_contents);
         let mut term_frequencies = FrequencyMap::new();
 
@@ -23,6 +26,14 @@ impl Parser {
                     .and_modify(|counter| *counter += 1)
                     .or_insert(1);
             }
+        }
+
+        for term in term_frequencies.keys() {
+            documents_term_map
+                .document_frequency
+                .entry(term.to_string())
+                .and_modify(|counter| *counter += 1)
+                .or_insert(1);
         }
 
         term_frequencies

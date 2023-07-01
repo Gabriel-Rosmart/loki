@@ -1,20 +1,21 @@
-use crate::{fetching::Indexer, parsing::Lexer};
-use std::{cmp::Ordering, collections::HashMap};
+use crate::{fetching::indexer::TermMapThroughDocuments, fetching::Indexer, parsing::Lexer};
+use std::cmp::Ordering;
 
 pub struct Searcher;
 
-type DocumentIndexMap = HashMap<String, HashMap<String, usize>>;
-
 impl Searcher {
-    pub fn search_term(query: &str, document_map: &DocumentIndexMap) {
+    pub fn search_term(query: &str, documents_term_map: &TermMapThroughDocuments) {
         let mut ranks = Vec::<(String, f32)>::new();
 
-        for (path, freq_table) in document_map {
+        for (path, freq_table) in &documents_term_map.term_frequency_per_document {
             let mut total_rank = 0f32;
 
             for token in Lexer::new(&query.chars().collect::<Vec<char>>()) {
                 total_rank += Indexer::term_frequency(&token, &freq_table)
-                    * Indexer::inverse_document_frequency(&token, &document_map);
+                    * Indexer::inverse_document_frequency(
+                        &token,
+                        &documents_term_map.term_frequency_per_document,
+                    );
             }
 
             if total_rank.partial_cmp(&0f32).unwrap() == Ordering::Greater {
