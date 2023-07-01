@@ -10,9 +10,10 @@ impl Parser {
     pub fn index(
         file_contents: Vec<char>,
         documents_term_map: &mut TermMapThroughDocuments,
-    ) -> FrequencyMap {
+    ) -> (FrequencyMap, usize) {
         let mut lexer = Lexer::new(&file_contents);
         let mut term_frequencies = FrequencyMap::new();
+        let mut total_entries: usize = 0;
 
         while let Some(token_slice) = lexer.next_token() {
             let token = token_slice
@@ -25,6 +26,8 @@ impl Parser {
                     .entry(token)
                     .and_modify(|counter| *counter += 1)
                     .or_insert(1);
+
+                total_entries += 1;
             }
         }
 
@@ -36,6 +39,6 @@ impl Parser {
                 .or_insert(1);
         }
 
-        term_frequencies
+        (term_frequencies, total_entries)
     }
 }

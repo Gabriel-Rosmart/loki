@@ -16,6 +16,4 @@ fn main() {
     Indexer::index_directory(&path, &mut term_map);
 
     Searcher::search_term(query, &term_map);
-
-    println!("{:#?}", term_map.document_frequency);
 }
