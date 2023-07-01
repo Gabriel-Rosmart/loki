@@ -1,3 +1,5 @@
+use super::{Fetcher, Reader};
+use crate::parsing::Parser;
 use std::collections::HashMap;
 
 pub struct Indexer;
@@ -23,5 +25,30 @@ impl Indexer {
             .max(1) as f32;
 
         (total_documents / term_frequency_across_documents).log10()
+    }
+
+    pub fn index_directory(dirpath: &str) -> DocumentIndexMap {
+        let mut document_map = DocumentIndexMap::new();
+
+        let dir_entries = Fetcher::fetch_directory(dirpath);
+        let total_entries = dir_entries.len();
+
+        for (index, file) in dir_entries.into_iter().enumerate() {
+            print!(
+                "Indexing... {:.2}%\r",
+                (index as f32 / total_entries as f32) * 100.0
+            );
+
+            let file_content = Reader::read_file(&file);
+
+            let terms_map = Parser::index(file_content.chars().collect::<Vec<char>>());
+
+            document_map.insert(
+                file.clone().into_os_string().into_string().unwrap(),
+                terms_map,
+            );
+        }
+
+        document_map
     }
 }
