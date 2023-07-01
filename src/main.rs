@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs};
+use std::collections::HashMap;
 
 use loki::{
     fetching::{indexer::Indexer, reader::Reader, Fetcher},
@@ -8,17 +8,25 @@ use loki::{
 type DocumentIndexMap = HashMap<String, HashMap<String, usize>>;
 
 fn main() {
-    let query: &str = &std::env::args().collect::<Vec<String>>()[1];
+    let args = std::env::args().collect::<Vec<String>>();
+    let query: &str = &args[2];
+    let assets_dir = &args[1];
 
     let mut path = std::env!("CARGO_MANIFEST_DIR").to_string();
 
-    path.push_str("/assets");
+    path.push_str(&format!("/{assets_dir}"));
 
     let mut document_map = DocumentIndexMap::new();
 
-    println!("Indexing...");
+    let dir_entries = Fetcher::fetch_directory(&path);
+    let total_entries = dir_entries.len();
 
-    for file in Fetcher::fetch_directory(&path) {
+    for (index, file) in dir_entries.into_iter().enumerate() {
+        print!(
+            "Indexing... {:.2}%\r",
+            (index as f32 / total_entries as f32) * 100.0
+        );
+
         let file_content = Reader::read_file(&file);
 
         let terms_map = Parser::index(file_content.chars().collect::<Vec<char>>());

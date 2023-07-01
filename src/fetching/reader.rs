@@ -1,6 +1,7 @@
 use std::{
     ffi::OsStr,
     fs::{self, File},
+    io::BufReader,
     path::{Path, PathBuf},
 };
 
@@ -18,7 +19,7 @@ impl Reader {
 
     fn read_xml_file(filepath: &PathBuf) -> String {
         let file = File::open(filepath).unwrap();
-        let event_reader = EventReader::new(file);
+        let event_reader = EventReader::new(BufReader::new(file));
 
         let mut content = String::new();
 
