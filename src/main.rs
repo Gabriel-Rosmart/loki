@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs};
 
 use loki::{
-    fetching::{indexer::Indexer, Fetcher},
+    fetching::{indexer::Indexer, reader::Reader, Fetcher},
     parsing::{parser::Parser, Lexer},
 };
 
@@ -16,13 +16,12 @@ fn main() {
 
     let mut document_map = DocumentIndexMap::new();
 
+    println!("Indexing...");
+
     for file in Fetcher::fetch_directory(&path) {
-        let terms_map = Parser::index(
-            fs::read_to_string(&file)
-                .unwrap()
-                .chars()
-                .collect::<Vec<char>>(),
-        );
+        let file_content = Reader::read_file(&file);
+
+        let terms_map = Parser::index(file_content.chars().collect::<Vec<char>>());
 
         document_map.insert(
             file.clone().into_os_string().into_string().unwrap(),
@@ -46,5 +45,7 @@ fn main() {
     ranks.sort_by(|(_, rank1), (_, rank2)| rank1.partial_cmp(rank2).unwrap());
     ranks.reverse();
 
-    println!("{ranks:#?}");
+    for (filepath, rank) in ranks.iter().take(10) {
+        println!("{filepath} => {rank}");
+    }
 }
