@@ -1,10 +1,16 @@
+use rust_stemmers::{Algorithm, Stemmer};
+
 pub struct Lexer<'a> {
     content: &'a [char],
+    stemmer: Stemmer,
 }
 
 impl<'a> Lexer<'a> {
     pub fn new(content: &'a [char]) -> Self {
-        Self { content }
+        Self {
+            content,
+            stemmer: Stemmer::create(Algorithm::English),
+        }
     }
 
     pub fn next_token(&mut self) -> Option<String> {
@@ -15,12 +21,12 @@ impl<'a> Lexer<'a> {
         }
 
         if self.content[0].is_alphabetic() {
-            return Some(
-                self.chop_while(|ch| ch.is_alphanumeric())
-                    .iter()
-                    .map(|ch| ch.to_ascii_uppercase())
-                    .collect(),
-            );
+            let token = self
+                .chop_while(|ch| ch.is_alphanumeric())
+                .iter()
+                .map(|ch| ch.to_ascii_lowercase())
+                .collect::<String>();
+            return Some(self.stemmer.stem(&token).to_string());
         }
 
         if self.content[0].is_numeric() {
