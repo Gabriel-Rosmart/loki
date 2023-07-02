@@ -1,20 +1,20 @@
-use crate::{fetching::indexer::TermMapThroughDocuments, fetching::Indexer, parsing::Lexer};
+use crate::{fetching::indexer::TfIdfModel, fetching::Indexer, parsing::Lexer};
 use std::cmp::Ordering;
 
 pub struct Searcher;
 
 impl Searcher {
-    pub fn search_term(query: &str, documents_term_map: &TermMapThroughDocuments) {
+    pub fn search_term(query: &str, tf_idf_model: &TfIdfModel) {
         let mut ranks = Vec::<(String, f32)>::new();
 
-        for (path, (freq_table, entries)) in &documents_term_map.term_frequency_per_document {
+        for (path, (freq_table, entries)) in &tf_idf_model.term_frequency_per_document {
             let mut total_rank = 0f32;
 
             for token in Lexer::new(&query.chars().collect::<Vec<char>>()) {
                 total_rank += Indexer::term_frequency(&token, &freq_table, *entries)
                     * Indexer::inverse_document_frequency(
                         &token,
-                        &documents_term_map.document_frequency,
+                        &tf_idf_model.term_frequency_across_documents,
                     );
             }
 

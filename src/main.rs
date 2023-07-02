@@ -1,5 +1,5 @@
 use loki::{
-    fetching::indexer::{Indexer, TermMapThroughDocuments},
+    fetching::indexer::{Indexer, TfIdfModel},
     searching::searcher::Searcher,
 };
 
@@ -12,7 +12,7 @@ fn main() {
 
     path.push_str(&format!("/{assets_dir}"));
 
-    let mut term_map = TermMapThroughDocuments::new();
+    let mut term_map = TfIdfModel::new();
     Indexer::index_directory(&path, &mut term_map);
 
     Searcher::search_term(query, &term_map);
