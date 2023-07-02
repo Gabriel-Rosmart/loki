@@ -61,12 +61,20 @@ impl Indexer {
 
             let file_content = Reader::read_file(&file);
 
-            let terms_map =
-                Parser::index(file_content.chars().collect::<Vec<char>>(), tf_idf_model);
+            let (terms_map, total_terms) =
+                Parser::index(file_content.chars().collect::<Vec<char>>());
+
+            for term in terms_map.keys() {
+                tf_idf_model
+                    .term_frequency_across_documents
+                    .entry(term.to_string())
+                    .and_modify(|counter| *counter += 1)
+                    .or_insert(1);
+            }
 
             tf_idf_model.term_frequency_per_document.insert(
                 file.clone().into_os_string().into_string().unwrap(),
-                terms_map,
+                (terms_map, total_terms),
             );
         }
     }

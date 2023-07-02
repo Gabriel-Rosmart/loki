@@ -12,8 +12,9 @@ fn main() {
 
     path.push_str(&format!("/{assets_dir}"));
 
-    let mut term_map = TfIdfModel::new();
-    Indexer::index_directory(&path, &mut term_map);
+    let mut tf_idf_model = TfIdfModel::new();
 
-    Searcher::search_term(query, &term_map);
+    Indexer::index_directory(&path, &mut tf_idf_model);
+
+    Searcher::search_term(query, &tf_idf_model);
 }

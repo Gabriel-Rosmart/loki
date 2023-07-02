@@ -1,5 +1,4 @@
 use super::lexer::Lexer;
-use crate::fetching::indexer::TfIdfModel;
 use std::collections::HashMap;
 
 type FrequencyMap = HashMap<String, usize>;
@@ -7,10 +6,7 @@ type FrequencyMap = HashMap<String, usize>;
 pub struct Parser;
 
 impl Parser {
-    pub fn index(
-        file_contents: Vec<char>,
-        documents_term_map: &mut TfIdfModel,
-    ) -> (FrequencyMap, usize) {
+    pub fn index(file_contents: Vec<char>) -> (FrequencyMap, usize) {
         let mut lexer = Lexer::new(&file_contents);
         let mut term_frequencies = FrequencyMap::new();
         let mut total_entries: usize = 0;
@@ -29,14 +25,6 @@ impl Parser {
 
                 total_entries += 1;
             }
-        }
-
-        for term in term_frequencies.keys() {
-            documents_term_map
-                .term_frequency_across_documents
-                .entry(term.to_string())
-                .and_modify(|counter| *counter += 1)
-                .or_insert(1);
         }
 
         (term_frequencies, total_entries)
