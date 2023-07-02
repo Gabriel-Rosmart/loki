@@ -1,4 +1,5 @@
 use super::lexer::Lexer;
+use crate::fetching::indexer::DocumentMap;
 use std::collections::HashMap;
 
 type FrequencyMap = HashMap<String, usize>;
@@ -6,7 +7,7 @@ type FrequencyMap = HashMap<String, usize>;
 pub struct Parser;
 
 impl Parser {
-    pub fn index(file_contents: Vec<char>) -> (FrequencyMap, usize) {
+    pub fn index(file_contents: Vec<char>) -> DocumentMap {
         let mut lexer = Lexer::new(&file_contents);
         let mut term_frequencies = FrequencyMap::new();
         let mut total_entries: usize = 0;
@@ -27,6 +28,9 @@ impl Parser {
             }
         }
 
-        (term_frequencies, total_entries)
+        DocumentMap {
+            frequency_map: term_frequencies,
+            total_terms: total_entries,
+        }
     }
 }

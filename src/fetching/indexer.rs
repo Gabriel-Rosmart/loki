@@ -6,10 +6,15 @@ use std::collections::HashMap;
 type FrequencyMap = HashMap<String, usize>;
 
 // Maps each document name with a FrequencyMap and how many distinct term has the document
-type TermFrequencyPerDocumentMap = HashMap<String, (HashMap<String, usize>, usize)>;
+type TermFrequencyPerDocumentMap = HashMap<String, DocumentMap>;
 
 // Maps how many times appears each term across all files
 type TermFrequencyAcrossDocumentsMap = HashMap<String, usize>;
+
+pub struct DocumentMap {
+    pub frequency_map: FrequencyMap,
+    pub total_terms: usize,
+}
 
 pub struct TfIdfModel {
     pub term_frequency_per_document: TermFrequencyPerDocumentMap,
@@ -61,10 +66,9 @@ impl Indexer {
 
             let file_content = Reader::read_file(&file);
 
-            let (terms_map, total_terms) =
-                Parser::index(file_content.chars().collect::<Vec<char>>());
+            let document_map = Parser::index(file_content.chars().collect::<Vec<char>>());
 
-            for term in terms_map.keys() {
+            for term in document_map.frequency_map.keys() {
                 tf_idf_model
                     .term_frequency_across_documents
                     .entry(term.to_string())
@@ -74,7 +78,7 @@ impl Indexer {
 
             tf_idf_model.term_frequency_per_document.insert(
                 file.clone().into_os_string().into_string().unwrap(),
-                (terms_map, total_terms),
+                document_map,
             );
         }
     }
