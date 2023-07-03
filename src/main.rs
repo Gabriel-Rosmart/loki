@@ -21,6 +21,5 @@ fn main() {
 
     Storage::save_model_to_disk(&tf_idf_model);
 
-    // let tf_idf_model = Storage::load_model_from_disk();
     Searcher::search_term(query, &tf_idf_model);
 }
