@@ -1,5 +1,7 @@
 /target
 assets/
+assets_xs/
 assets_small/
 assets_medium/
 resources.md
+index.cbor

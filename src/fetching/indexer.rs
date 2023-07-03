@@ -1,5 +1,6 @@
 use super::{Fetcher, Reader};
 use crate::parsing::Parser;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 // Maps each term with how many times appears in a single document
@@ -11,11 +12,13 @@ type TermFrequencyPerDocumentMap = HashMap<String, DocumentMap>;
 // Maps how many times appears each term across all files
 type TermFrequencyAcrossDocumentsMap = HashMap<String, usize>;
 
+#[derive(Default, Serialize, Deserialize)]
 pub struct DocumentMap {
     pub frequency_map: FrequencyMap,
     pub total_terms: usize,
 }
 
+#[derive(Default, Serialize, Deserialize)]
 pub struct TfIdfModel {
     pub term_frequency_per_document: TermFrequencyPerDocumentMap,
     pub term_frequency_across_documents: TermFrequencyAcrossDocumentsMap,

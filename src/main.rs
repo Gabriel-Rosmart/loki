@@ -1,5 +1,8 @@
 use loki::{
-    fetching::indexer::{Indexer, TfIdfModel},
+    fetching::{
+        indexer::{Indexer, TfIdfModel},
+        Storage,
+    },
     searching::searcher::Searcher,
 };
 
@@ -16,5 +19,8 @@ fn main() {
 
     Indexer::index_directory(&path, &mut tf_idf_model);
 
+    Storage::save_model_to_disk(&tf_idf_model);
+
+    // let tf_idf_model = Storage::load_model_from_disk();
     Searcher::search_term(query, &tf_idf_model);
 }
