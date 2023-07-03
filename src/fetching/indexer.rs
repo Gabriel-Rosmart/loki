@@ -69,6 +69,12 @@ impl Indexer {
 
             let file_content = Reader::read_file(&file);
 
+            if file_content.is_err() {
+                continue;
+            }
+
+            let file_content = file_content.unwrap();
+
             let document_map = Parser::index(file_content.chars().collect::<Vec<char>>());
 
             for term in document_map.frequency_map.keys() {

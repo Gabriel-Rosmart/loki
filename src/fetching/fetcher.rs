@@ -26,6 +26,7 @@ impl Fetcher {
         entry.file_type().is_file()
             && !(entry.metadata().unwrap().permissions().mode() & 0o111 != 0)
             && !entry.path_is_symlink()
+            && entry.metadata().unwrap().len() != 0
             && !entry.path().has_extension(Self::FORBIDDEN_EXTENSIONS)
     }
 }

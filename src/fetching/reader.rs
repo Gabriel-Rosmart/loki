@@ -10,10 +10,10 @@ use xml::reader::{EventReader, XmlEvent};
 pub struct Reader;
 
 impl Reader {
-    pub fn read_file(file: &PathBuf) -> String {
+    pub fn read_file(file: &PathBuf) -> Result<String, std::io::Error> {
         match Path::new(file).extension().and_then(OsStr::to_str).unwrap() {
-            "xml" | "xhtml" => Self::read_xml_file(&file),
-            _ => fs::read_to_string(&file).unwrap(),
+            "xml" | "xhtml" => Ok(Self::read_xml_file(&file)),
+            _ => fs::read_to_string(&file),
         }
     }
 
