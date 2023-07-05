@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 pub struct Searcher;
 
 impl Searcher {
-    pub fn search_term(query: &str, tf_idf_model: &TfIdfModel) {
+    pub fn search_term(query: &str, tf_idf_model: &TfIdfModel) -> Vec<(String, f32)> {
         let mut ranks = Vec::<(String, f32)>::new();
 
         for (path, document) in &tf_idf_model.term_frequency_per_document {
@@ -27,8 +27,10 @@ impl Searcher {
         ranks.sort_by(|(_, rank1), (_, rank2)| rank1.partial_cmp(rank2).unwrap());
         ranks.reverse();
 
-        for (filepath, rank) in ranks.iter().take(10) {
-            println!("{filepath} => {rank}");
-        }
+        ranks
+
+        // for (filepath, rank) in ranks.iter().take(10) {
+        //     println!("{filepath} => {rank}");
+        // }
     }
 }

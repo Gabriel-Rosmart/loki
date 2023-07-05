@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <form>
+      <h1>query:</h1>
+      <input type="text" name="query" id="query_input">  
+    </form>
+    
+  </body>
+
+  <script>
+  document.forms[0].onsubmit = async (e) => {
+    e.preventDefault()
+    // console.log(document.getElementById('query_input').value) 
+
+    const response = await fetch('http://localhost:8000/', {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        // mode: 'no-cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        // credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+          'Content-Type': 'text/plain'
+        },
+        // redirect: 'follow', 
+        body: document.getElementById('query_input').value
+      })
+    
+
+    console.log(await response.json())
+  }
+
+  </script>
+
+</html>
