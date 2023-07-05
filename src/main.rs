@@ -1,3 +1,9 @@
+use std::{
+    sync::{Arc, Mutex},
+    thread,
+    time::Duration,
+};
+
 use loki::{
     fetching::{
         indexer::{Indexer, TfIdfModel},
@@ -10,24 +16,21 @@ use tiny_http::{Header, Method, Response, Server};
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
-    let query: &str = &args[2];
     let assets_dir = &args[1];
 
     let mut path = std::env!("CARGO_MANIFEST_DIR").to_string();
 
     path.push_str(&format!("/{assets_dir}"));
 
-    // let mut tf_idf_model = TfIdfModel::new();
+    let tf_idf_model = Arc::new(Mutex::new(TfIdfModel::new()));
 
-    // Indexer::index_directory(&path, &mut tf_idf_model);
+    let indexing_model = Arc::clone(&tf_idf_model);
+    std::thread::spawn(move || loop {
+        let model = Arc::clone(&indexing_model);
 
-    // Storage::save_model_to_disk(&tf_idf_model);
-
-    println!("Loading index from disk...");
-
-    let tf_idf_model = Storage::load_model_from_disk();
-
-    // Searcher::search_term(query, &tf_idf_model);
+        Indexer::index_directory(&path, model);
+        std::thread::sleep(Duration::from_secs(3));
+    });
 
     let server = Server::http("127.0.0.1:8000").unwrap();
 
@@ -40,7 +43,7 @@ fn main() {
                 request.as_reader().read_to_end(&mut buffer).unwrap();
                 let body = std::str::from_utf8(&buffer).unwrap();
 
-                let search_result = Searcher::search_term(&body, &tf_idf_model);
+                let search_result = Searcher::search_term(&body, Arc::clone(&tf_idf_model));
                 let search_result = search_result.iter().take(10).collect::<Vec<_>>();
 
                 request

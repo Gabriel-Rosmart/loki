@@ -1,13 +1,18 @@
 use crate::{fetching::indexer::TfIdfModel, fetching::Indexer, parsing::Lexer};
-use std::cmp::Ordering;
+use std::{
+    cmp::Ordering,
+    sync::{Arc, Mutex},
+};
 
 pub struct Searcher;
 
 impl Searcher {
-    pub fn search_term(query: &str, tf_idf_model: &TfIdfModel) -> Vec<(String, f32)> {
+    pub fn search_term(query: &str, tf_idf_model: Arc<Mutex<TfIdfModel>>) -> Vec<(String, f32)> {
         let mut ranks = Vec::<(String, f32)>::new();
 
-        for (path, document) in &tf_idf_model.term_frequency_per_document {
+        let model = tf_idf_model.lock().unwrap();
+
+        for (path, document) in &model.term_frequency_per_document {
             let mut total_rank = 0f32;
 
             for token in Lexer::new(&query.chars().collect::<Vec<char>>()) {
@@ -15,7 +20,7 @@ impl Searcher {
                     Indexer::term_frequency(&token, &document.frequency_map, document.total_terms)
                         * Indexer::inverse_document_frequency(
                             &token,
-                            &tf_idf_model.term_frequency_across_documents,
+                            &model.term_frequency_across_documents,
                         );
             }
 
@@ -28,9 +33,5 @@ impl Searcher {
         ranks.reverse();
 
         ranks
-
-        // for (filepath, rank) in ranks.iter().take(10) {
-        //     println!("{filepath} => {rank}");
-        // }
     }
 }

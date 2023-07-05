@@ -1,7 +1,11 @@
 use super::{Fetcher, Reader};
 use crate::parsing::Parser;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    io::Write,
+    sync::{Arc, Mutex},
+};
 
 // Maps each term with how many times appears in a single document
 type FrequencyMap = HashMap<String, usize>;
@@ -57,7 +61,7 @@ impl Indexer {
         (total_documents / term_frequency_across_documents).log10()
     }
 
-    pub fn index_directory(dirpath: &str, tf_idf_model: &mut TfIdfModel) {
+    pub fn index_directory(dirpath: &str, tf_idf_model: Arc<Mutex<TfIdfModel>>) {
         let dir_entries = Fetcher::fetch_directory(dirpath);
         let total_entries = dir_entries.len();
 
@@ -77,18 +81,23 @@ impl Indexer {
 
             let document_map = Parser::index(file_content.chars().collect::<Vec<char>>());
 
+            let mut model = tf_idf_model.lock().unwrap();
+
             for term in document_map.frequency_map.keys() {
-                tf_idf_model
+                model
                     .term_frequency_across_documents
                     .entry(term.to_string())
                     .and_modify(|counter| *counter += 1)
                     .or_insert(1);
             }
 
-            tf_idf_model.term_frequency_per_document.insert(
+            model.term_frequency_per_document.insert(
                 file.clone().into_os_string().into_string().unwrap(),
                 document_map,
             );
         }
+
+        print!("Indexing... 100.00%\r");
+        std::io::stdout().flush().unwrap();
     }
 }
