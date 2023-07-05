@@ -1,8 +1,10 @@
-use crate::{fetching::indexer::TfIdfModel, fetching::Indexer, parsing::Lexer};
+use crate::{fetching::indexer::TfIdfModel, parsing::Lexer};
 use std::{
     cmp::Ordering,
     sync::{Arc, Mutex},
 };
+
+use crate::ranking::ranker;
 
 pub struct Searcher;
 
@@ -17,8 +19,8 @@ impl Searcher {
 
             for token in Lexer::new(&query.chars().collect::<Vec<char>>()) {
                 total_rank +=
-                    Indexer::term_frequency(&token, &document.frequency_map, document.total_terms)
-                        * Indexer::inverse_document_frequency(
+                    ranker::term_frequency(&token, &document.frequency_map, document.total_terms)
+                        * ranker::inverse_document_frequency(
                             &token,
                             &model.term_frequency_across_documents,
                         );

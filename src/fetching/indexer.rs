@@ -40,27 +40,6 @@ impl TfIdfModel {
 pub struct Indexer;
 
 impl Indexer {
-    pub fn term_frequency(
-        term: &str,
-        document_term_frequencies: &FrequencyMap,
-        document_entries: usize,
-    ) -> f32 {
-        *document_term_frequencies.get(term).unwrap_or(&0) as f32 / document_entries as f32
-    }
-
-    pub fn inverse_document_frequency(
-        term: &str,
-        term_frequency_across_documents_cache: &TermFrequencyAcrossDocumentsMap,
-    ) -> f32 {
-        let total_documents = term_frequency_across_documents_cache.len() as f32;
-        let term_frequency_across_documents = term_frequency_across_documents_cache
-            .get(term)
-            .cloned()
-            .unwrap_or(1) as f32;
-
-        (total_documents / term_frequency_across_documents).log10()
-    }
-
     pub fn index_directory(dirpath: &str, tf_idf_model: Arc<Mutex<TfIdfModel>>) {
         let dir_entries = Fetcher::fetch_directory(dirpath);
         let total_entries = dir_entries.len();
@@ -100,4 +79,31 @@ impl Indexer {
         print!("Indexing... 100.00%\r");
         std::io::stdout().flush().unwrap();
     }
+
+    // fn index_file(file: &Pathbuf, tf_idf_model: Arc<Mutex<TfIdfModel>>) {
+    //     let file_content = Reader::read_file(&file);
+    //
+    //     if file_content.is_err() {
+    //         continue;
+    //     }
+    //
+    //     let file_content = file_content.unwrap();
+    //
+    //     let document_map = Parser::index(file_content.chars().collect::<Vec<char>>());
+    //
+    //     let mut model = tf_idf_model.lock().unwrap();
+    //
+    //     for term in document_map.frequency_map.keys() {
+    //         model
+    //             .term_frequency_across_documents
+    //             .entry(term.to_string())
+    //             .and_modify(|counter| *counter += 1)
+    //             .or_insert(1);
+    //     }
+    //
+    //     model.term_frequency_per_document.insert(
+    //         file.clone().into_os_string().into_string().unwrap(),
+    //         document_map,
+    //     );
+    // }
 }
