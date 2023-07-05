@@ -1,18 +1,19 @@
 use std::{
+    collections::HashMap,
+    path::PathBuf,
     sync::{Arc, Mutex},
-    thread,
     time::Duration,
+    time::SystemTime,
 };
 
 use loki::{
-    fetching::{
-        indexer::{Indexer, TfIdfModel},
-        Storage,
-    },
+    fetching::indexer::{Indexer, TfIdfModel},
     searching::searcher::Searcher,
 };
 
 use tiny_http::{Header, Method, Response, Server};
+
+type FileModificationsTable = HashMap<PathBuf, SystemTime>;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
@@ -25,11 +26,14 @@ fn main() {
     let tf_idf_model = Arc::new(Mutex::new(TfIdfModel::new()));
 
     let indexing_model = Arc::clone(&tf_idf_model);
-    std::thread::spawn(move || loop {
-        let model = Arc::clone(&indexing_model);
+    std::thread::spawn(move || {
+        let mut mods_table = FileModificationsTable::new();
+        loop {
+            let model = Arc::clone(&indexing_model);
 
-        Indexer::index_directory(&path, model);
-        std::thread::sleep(Duration::from_secs(3));
+            Indexer::index_directory(&path, model, &mut mods_table);
+            std::thread::sleep(Duration::from_secs(3));
+        }
     });
 
     let server = Server::http("127.0.0.1:8000").unwrap();
